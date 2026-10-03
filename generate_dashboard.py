@@ -1556,8 +1556,11 @@ def render_dashboard_html(lang='ko', switch_href='passorder1_dashboard_en.html')
   // -------------------------------------------------------------
   // 1-3. INITIALIZE CHARTS (BULLETPROOF ASYNC & HTMLPREVIEW READY)
   // -------------------------------------------------------------
+  let chartsInitialized = false;
   function initCharts() {{
     if (typeof Chart === 'undefined') return;
+    if (chartsInitialized) return;
+    chartsInitialized = true;
 
     const hasDataLabels = (typeof ChartDataLabels !== 'undefined');
     if (hasDataLabels) {{
@@ -1861,7 +1864,10 @@ def render_dashboard_html(lang='ko', switch_href='passorder1_dashboard_en.html')
   // -------------------------------------------------------------
   // 4. INTERACTIVE STORE DATA FILTER ENGINE (VANILLA JS)
   // -------------------------------------------------------------
+  let filtersInitialized = false;
   function initInteractiveStoreFilter() {{
+    if (filtersInitialized) return;
+    filtersInitialized = true;
     const tbody = document.getElementById('storeTableBody');
     if (!tbody) return;
     const rows = Array.from(tbody.querySelectorAll('.store-row'));
