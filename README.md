@@ -96,9 +96,9 @@ Below is the production executive dashboard interface built for C-Level leadersh
 </p>
 
 <p align="center">
-  👉 <strong><a href="index.html">🚀 Click Here to Launch Interactive Dashboard (Live Filter & Search)</a></strong>
+  👉 <strong><a href="https://htmlpreview.github.io/?https://github.com/sano035-design/passorder_additional_analysis-/blob/main/output/passorder1_dashboard_en.html" target="_blank" rel="noopener noreferrer">🚀 Click Here to Launch Interactive Dashboard (Live Popup Demo)</a></strong>
   <br>
-  <sub>(Direct standalone execution | Live interactive filtering across all 13 merchant cafes)</sub>
+  <sub>(Opens interactive dashboard in a new tab | Live real-time filtering across all 13 merchant cafes)</sub>
 </p>
 
 > [!TIP]
@@ -316,9 +316,9 @@ Start-Process "passorder1/output/passorder1_dashboard.html"
 </p>
 
 <p align="center">
-  👉 <strong><a href="index.html">🚀 여기를 클릭하여 실시간 필터 인터랙티브 대시보드 열기</a></strong>
+  👉 <strong><a href="https://htmlpreview.github.io/?https://github.com/sano035-design/passorder_additional_analysis-/blob/main/output/passorder1_dashboard.html" target="_blank" rel="noopener noreferrer">🚀 여기를 클릭하여 실시간 필터 인터랙티브 대시보드 즉시 열기 (새 창 팝업)</a></strong>
   <br>
-  <sub>(단일 독립 구동 HTML 대시보드 | 브라우저에서 13개 가맹점 실시간 필터 및 검색 직접 체험 가능)</sub>
+  <sub>(새 탭/창에서 인터랙티브 대시보드 즉시 실행 | 13개 가맹점 실시간 필터 및 검색 직접 체험)</sub>
 </p>
 
 > [!TIP]
