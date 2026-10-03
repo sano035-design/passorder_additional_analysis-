@@ -112,8 +112,8 @@ Below is the production executive dashboard interface built for C-Level leadersh
 > * 📊 **Dynamic Metric Recalculation**: Selected store count, total incremental GMV, and average growth rate update automatically on the fly.
 > * 🔄 **Instant Reset**: One-click restoration of all 13 merchant stores.
 > 
-> * **Live Web Hosting (GitHub Pages)**: `https://<YOUR_GITHUB_USERNAME>.github.io/<YOUR_REPO_NAME>/`
-> * **Instant HTMLPreview Demo**: [`Open via HTMLPreview`](https://htmlpreview.github.io/?https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/blob/main/output/passorder1_dashboard_en.html)
+> * **Live Web Hosting (GitHub Pages)**: [https://sano035-design.github.io/passorder1/](https://sano035-design.github.io/passorder1/)
+> * **Instant HTMLPreview Demo**: [Open Interactive English Demo via HTMLPreview](https://htmlpreview.github.io/?https://github.com/sano035-design/passorder1/blob/main/output/passorder1_dashboard_en.html)
 > * **Local File Execution**: Open [`output/passorder1_dashboard_en.html`](output/passorder1_dashboard_en.html) or [`index.html`](index.html) directly in any web browser.
 
 ```
@@ -334,8 +334,8 @@ Start-Process "passorder1/output/passorder1_dashboard.html"
 > * 📊 **동적 실시간 통계 자동 재계산**: 필터 선택 시 선택 매장 수, 필터 매장 총 증분 매출, 평균 성장률이 상단 KPI 배지에 즉시 재산출
 > * 🔄 **원클릭 필터 초기화**: 단 한 번의 클릭으로 13개 전체 매장 원상 복구
 > 
-> * **웹 라이브 호스팅 (GitHub Pages)**: `https://<YOUR_GITHUB_USERNAME>.github.io/<YOUR_REPO_NAME>/`
-> * **HTMLPreview 즉시 실행 데모**: [`HTMLPreview 데모 바로가기`](https://htmlpreview.github.io/?https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/blob/main/output/passorder1_dashboard.html)
+> * **웹 라이브 호스팅 (GitHub Pages)**: [https://sano035-design.github.io/passorder1/](https://sano035-design.github.io/passorder1/)
+> * **HTMLPreview 즉시 실행 데모**: [HTMLPreview 한국어 인터랙티브 데모 바로가기](https://htmlpreview.github.io/?https://github.com/sano035-design/passorder1/blob/main/output/passorder1_dashboard.html)
 > * **로컬 브라우저 직접 실행**: [`output/passorder1_dashboard.html`](output/passorder1_dashboard.html) 또는 [`index.html`](index.html) 더블클릭 실행
 
 ```
