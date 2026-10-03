@@ -89,12 +89,10 @@
 
 ## 6. Dashboard Visualization Architecture (Tri-Chart Grid & Interactive Filter)
 
-Below is the production executive dashboard interface built for C-Level leadership. Click the dashboard preview image or the interactive launch buttons below to explore the live dashboard with real-time filtering:
+Below is the production executive dashboard interface built for C-Level leadership. The dashboard preview image is displayed directly below, and you can explore the live dashboard with real-time filtering via the interactive launch links:
 
 <p align="center">
-  <a href="index.html">
-    <img src="templates/passorder1_dashboard_en.jpg" alt="Pass Order Executive Dashboard Preview (English)" width="95%" />
-  </a>
+  <img src="templates/passorder1_dashboard_en.jpg" alt="Pass Order Executive Dashboard Preview (English)" width="100%" />
 </p>
 
 <p align="center">
@@ -311,12 +309,10 @@ Start-Process "passorder1/output/passorder1_dashboard.html"
 
 ## 6. 대시보드 시각화 구조 (3대 차트 그리드 & 실시간 인터랙티브 필터)
 
-실제 구축된 프로덕션 C-Level 경영진 대시보드 인터페이스입니다. 대시보드 미리보기 이미지를 클릭하거나 아래의 전용 실행 링크를 통해 웹 브라우저에서 직접 매장별 필터링을 조작할 수 있는 인터랙티브 대시보드를 열람할 수 있습니다:
+실제 구축된 프로덕션 C-Level 경영진 대시보드 인터페이스입니다. 대시보드 미리보기 이미지가 본문에 바로 표시되며, 아래의 전용 실행 링크를 통해 웹 브라우저에서 직접 매장별 필터링을 조작할 수 있는 인터랙티브 대시보드를 열람할 수 있습니다:
 
 <p align="center">
-  <a href="index.html">
-    <img src="templates/passorder1_dashboard.jpg" alt="패스오더 경영진 대시보드 미리보기 (한국어)" width="95%" />
-  </a>
+  <img src="templates/passorder1_dashboard.jpg" alt="패스오더 경영진 대시보드 미리보기 (한국어)" width="100%" />
 </p>
 
 <p align="center">

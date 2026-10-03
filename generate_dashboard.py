@@ -1553,284 +1553,317 @@ def render_dashboard_html(lang='ko', switch_href='passorder1_dashboard_en.html')
   const currencySuffix = '{t["currency_suffix"]}';
   const noResultText = '{t["filter_no_results"]}';
 
-  // 1. Stacked Bar Chart: Cost vs Revenue
-  const ctxCostRev = document.getElementById('costVsRevenueChart').getContext('2d');
-  new Chart(ctxCostRev, {{
-    type: 'bar',
-    data: {{
-      labels: ['{t["bar_axis_cost"]}', '{t["bar_axis_rev"]}'],
-      datasets: [
-        // Dataset 0: Cost
+  // -------------------------------------------------------------
+  // 1-3. INITIALIZE CHARTS (BULLETPROOF ASYNC & HTMLPREVIEW READY)
+  // -------------------------------------------------------------
+  function initCharts() {{
+    if (typeof Chart === 'undefined') return;
+
+    const hasDataLabels = (typeof ChartDataLabels !== 'undefined');
+    if (hasDataLabels) {{
+      try {{
+        Chart.register(ChartDataLabels);
+      }} catch (err) {{
+        console.warn('ChartDataLabels registration notice:', err);
+      }}
+    }}
+
+    // 1. Stacked Bar Chart: Cost vs Revenue
+    const elCostRev = document.getElementById('costVsRevenueChart');
+    if (elCostRev) {{
+      const ctxCostRev = elCostRev.getContext('2d');
+      const barPlugins = [
         {{
-          label: '{t["bar_cost_label"]}',
-          data: [D.total_cost, 0],
-          backgroundColor: '#F43F5E',
-          borderRadius: 6,
-          stack: 'stack1',
-          datalabels: {{
-            display: (ctx) => ctx.dataIndex === 0,
-            anchor: 'end',
-            align: 'top',
-            offset: 6,
-            color: '#FDA4AF',
-            font: {{ family: 'Outfit, Pretendard, Inter', weight: 'bold', size: 12 }},
-            formatter: () => '{t["bar_cost_label"]} ' + D.total_cost.toLocaleString() + unitSuffix
-          }}
-        }},
-        // Dataset 1: Revenue Stack 1 (Onboarding Benefit Savings)
-        {{
-          label: '{t["bar_savings_label"]}',
-          data: [0, D.benefit_savings_val],
-          backgroundColor: '#059669',
-          borderRadius: 4,
-          stack: 'stack1',
-          datalabels: {{
-            display: (ctx) => ctx.dataIndex === 1,
-            anchor: 'center',
-            align: 'center',
-            color: '#FFFFFF',
-            font: {{ family: 'Outfit, Pretendard, Inter', weight: 'bold', size: 11 }},
-            formatter: () => D.benefit_savings_val.toLocaleString() + unitSuffix
-          }}
-        }},
-        // Dataset 2: Revenue Stack 2 (Store Fees)
-        {{
-          label: '{t["bar_fee_label"]}',
-          data: [0, D.cap_store_revenue_13],
-          backgroundColor: '#10B981',
-          borderRadius: 6,
-          stack: 'stack1',
-          datalabels: {{
-            display: (ctx) => ctx.dataIndex === 1,
-            anchor: 'center',
-            align: 'center',
-            color: '#FFFFFF',
-            font: {{ family: 'Outfit, Pretendard, Inter', weight: 'bold', size: 12 }},
-            formatter: () => D.cap_store_revenue_13.toLocaleString() + unitSuffix
+          id: 'totalRevTopLabel',
+          afterDatasetsDraw(chart) {{
+            const {{ ctx, scales: {{ x, y }} }} = chart;
+            const revMeta = chart.getDatasetMeta(2);
+            if (revMeta && revMeta.data[1]) {{
+              const bar = revMeta.data[1];
+              ctx.save();
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+              ctx.font = 'bold 12px Outfit, Pretendard, Inter, sans-serif';
+              ctx.fillStyle = '#6EE7B7';
+              ctx.fillText('{t["bar_total_rev_label"]} ' + D.total_revenue_13.toLocaleString() + unitSuffix, bar.x, bar.y - 6);
+              ctx.restore();
+            }}
           }}
         }}
-      ]
-    }},
-    plugins: [
-      ChartDataLabels,
-      {{
-        id: 'totalRevTopLabel',
-        afterDatasetsDraw(chart) {{
-          const {{ ctx, scales: {{ x, y }} }} = chart;
-          const revMeta = chart.getDatasetMeta(2);
-          if (revMeta && revMeta.data[1]) {{
-            const bar = revMeta.data[1];
+      ];
+      if (hasDataLabels) barPlugins.unshift(ChartDataLabels);
+
+      new Chart(ctxCostRev, {{
+        type: 'bar',
+        data: {{
+          labels: ['{t["bar_axis_cost"]}', '{t["bar_axis_rev"]}'],
+          datasets: [
+            {{
+              label: '{t["bar_cost_label"]}',
+              data: [D.total_cost, 0],
+              backgroundColor: '#F43F5E',
+              borderRadius: 6,
+              stack: 'stack1',
+              datalabels: {{
+                display: (ctx) => ctx.dataIndex === 0,
+                anchor: 'end',
+                align: 'top',
+                offset: 6,
+                color: '#FDA4AF',
+                font: {{ family: 'Outfit, Pretendard, Inter', weight: 'bold', size: 12 }},
+                formatter: () => '{t["bar_cost_label"]} ' + D.total_cost.toLocaleString() + unitSuffix
+              }}
+            }},
+            {{
+              label: '{t["bar_savings_label"]}',
+              data: [0, D.benefit_savings_val],
+              backgroundColor: '#059669',
+              borderRadius: 4,
+              stack: 'stack1',
+              datalabels: {{
+                display: (ctx) => ctx.dataIndex === 1,
+                anchor: 'center',
+                align: 'center',
+                color: '#FFFFFF',
+                font: {{ family: 'Outfit, Pretendard, Inter', weight: 'bold', size: 11 }},
+                formatter: () => D.benefit_savings_val.toLocaleString() + unitSuffix
+              }}
+            }},
+            {{
+              label: '{t["bar_fee_label"]}',
+              data: [0, D.cap_store_revenue_13],
+              backgroundColor: '#10B981',
+              borderRadius: 6,
+              stack: 'stack1',
+              datalabels: {{
+                display: (ctx) => ctx.dataIndex === 1,
+                anchor: 'center',
+                align: 'center',
+                color: '#FFFFFF',
+                font: {{ family: 'Outfit, Pretendard, Inter', weight: 'bold', size: 12 }},
+                formatter: () => D.cap_store_revenue_13.toLocaleString() + unitSuffix
+              }}
+            }}
+          ]
+        }},
+        plugins: barPlugins,
+        options: {{
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {{ padding: {{ top: 25, bottom: 5 }} }},
+          plugins: {{
+            legend: {{
+              position: 'top',
+              labels: {{ color: '#E2E8F0', font: {{ family: 'Pretendard, Inter', size: 10, weight: 600 }}, boxWidth: 10 }}
+            }},
+            tooltip: {{
+              callbacks: {{
+                label: (ctx) => ctx.dataset.label + ': ' + ctx.raw.toLocaleString() + unitSuffix
+              }}
+            }}
+          }},
+          scales: {{
+            x: {{ stacked: true, grid: {{ color: '#1E2230' }}, ticks: {{ color: '#E2E8F0', font: {{ family: 'Pretendard, Inter', weight: 'bold' }} }} }},
+            y: {{
+              stacked: true,
+              min: 0,
+              max: 3500000,
+              grid: {{ color: '#1E2230' }},
+              ticks: {{
+                color: '#94A3B8',
+                font: {{ family: 'Outfit' }},
+                callback: {t['bar_y_format']}
+              }}
+            }}
+          }}
+        }}
+      }});
+    }}
+
+    // Callout Box Plugin for Retention Curve
+    const cohortCalloutPlugin = {{
+      id: 'cohortCallout',
+      afterDraw(chart) {{
+        const {{ ctx, scales: {{ x, y }} }} = chart;
+        const meta = chart.getDatasetMeta(0);
+        const targetPoint = meta.data[12];
+        if (!targetPoint) return;
+
+        const tx = targetPoint.x;
+        const ty = targetPoint.y;
+
+        const bw = 175;
+        const bh = 26;
+        const bx = tx - bw - 15;
+        const by = ty - 45;
+
+        ctx.save();
+        ctx.strokeStyle = '#FF5C1E';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.moveTo(bx + bw * 0.7, by + bh);
+        ctx.lineTo(tx, ty - 12);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.beginPath();
+        ctx.fillStyle = '#FF5C1E';
+        ctx.moveTo(tx, ty - 8);
+        ctx.lineTo(tx - 4, ty - 15);
+        ctx.lineTo(tx + 4, ty - 15);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.fillStyle = '#0B0D13';
+        ctx.strokeStyle = '#FF5C1E';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh, 4);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = '#FFA07A';
+        ctx.font = 'bold 11px Pretendard, Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('{t["callout_text"]}', bx + bw / 2, by + bh / 2);
+        ctx.restore();
+      }}
+    }};
+
+    // 2. Retention Curve Chart
+    const elRet = document.getElementById('retentionChart');
+    if (elRet) {{
+      const ctxRet = elRet.getContext('2d');
+      const retPlugins = [cohortCalloutPlugin];
+      if (hasDataLabels) retPlugins.unshift(ChartDataLabels);
+
+      new Chart(ctxRet, {{
+        type: 'line',
+        data: {{
+          labels: D.weeks_list,
+          datasets: [
+            {{
+              label: '{t["leg_group_b"]}',
+              data: D.retention_curve_b,
+              borderColor: '#FF5C1E',
+              backgroundColor: 'rgba(255, 92, 30, 0.15)',
+              fill: true,
+              tension: 0.25,
+              borderWidth: 3,
+              pointBackgroundColor: '#FF5C1E',
+              pointRadius: 3
+            }},
+            {{
+              label: '{t["leg_group_a"]}',
+              data: D.retention_curve_a,
+              borderColor: '#94A3B8',
+              backgroundColor: 'rgba(148, 163, 184, 0.05)',
+              borderDash: [5, 5],
+              fill: true,
+              tension: 0.25,
+              borderWidth: 2,
+              pointBackgroundColor: '#94A3B8',
+              pointRadius: 2
+            }}
+          ]
+        }},
+        plugins: retPlugins,
+        options: {{
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {{
+            padding: {{ right: 35, top: 25, left: 10, bottom: 10 }}
+          }},
+          plugins: {{
+            legend: {{
+              position: 'top',
+              labels: {{ color: '#E2E8F0', font: {{ family: 'Pretendard, Inter', size: 10, weight: 600 }}, boxWidth: 12 }}
+            }},
+            datalabels: {{
+              display: (ctx) => ctx.dataIndex === 0 || ctx.dataIndex === 6 || ctx.dataIndex === 12,
+              anchor: 'top',
+              align: 'top',
+              offset: 4,
+              color: function(ctx) {{
+                if (ctx.datasetIndex === 0 && ctx.dataIndex === 12) return '#FFA07A';
+                return ctx.datasetIndex === 0 ? '#FFFFFF' : '#94A3B8';
+              }},
+              font: {{ family: 'Outfit', weight: 'bold', size: 10 }},
+              formatter: (v) => v + '%'
+            }}
+          }},
+          scales: {{
+            x: {{ grid: {{ color: '#1E2230' }}, ticks: {{ color: '#94A3B8', font: {{ family: 'Outfit', size: 10 }} }} }},
+            y: {{ min: 0, max: 115, grid: {{ color: '#1E2230' }}, ticks: {{ color: '#94A3B8', font: {{ family: 'Outfit', size: 10 }}, callback: (v) => v + '%' }} }}
+          }}
+        }}
+      }});
+    }}
+
+    // 3. Monthly GMV >= 1M KRW Ratio Pie/Donut Chart
+    const elPie = document.getElementById('storeCapPieChart');
+    if (elPie) {{
+      const ctxPie = elPie.getContext('2d');
+      const piePlugins = [
+        {{
+          id: 'centerText',
+          beforeDraw(chart) {{
+            const {{ width, height, ctx }} = chart;
             ctx.save();
             ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            ctx.font = 'bold 12px Outfit, Pretendard, Inter, sans-serif';
-            ctx.fillStyle = '#6EE7B7';
-            ctx.fillText('{t["bar_total_rev_label"]} ' + D.total_revenue_13.toLocaleString() + unitSuffix, bar.x, bar.y - 6);
+            ctx.textBaseline = 'middle';
+            ctx.font = '900 24px Outfit, Pretendard, Inter, sans-serif';
+            ctx.fillStyle = '#34D399';
+            ctx.fillText('100%', width / 2, height / 2 - 8);
+            ctx.font = '700 11px Pretendard, Inter, sans-serif';
+            ctx.fillStyle = '#94A3B8';
+            ctx.fillText('{t["panel3_center_sub"]}', width / 2, height / 2 + 12);
             ctx.restore();
           }}
         }}
-      }}
-    ],
-    options: {{
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: {{ padding: {{ top: 25, bottom: 5 }} }},
-      plugins: {{
-        legend: {{
-          position: 'top',
-          labels: {{ color: '#E2E8F0', font: {{ family: 'Pretendard, Inter', size: 10, weight: 600 }}, boxWidth: 10 }}
+      ];
+      if (hasDataLabels) piePlugins.unshift(ChartDataLabels);
+
+      new Chart(ctxPie, {{
+        type: 'doughnut',
+        data: {{
+          labels: ['{t["panel3_leg_reach"]}', '{t["panel3_leg_under"]}'],
+          datasets: [{{
+            data: [13, 0],
+            backgroundColor: ['#10B981', '#334155'],
+            borderColor: '#181B26',
+            borderWidth: 3,
+            cutout: '68%'
+          }}]
         }},
-        tooltip: {{
-          callbacks: {{
-            label: (ctx) => ctx.dataset.label + ': ' + ctx.raw.toLocaleString() + unitSuffix
+        plugins: piePlugins,
+        options: {{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {{
+            legend: {{
+              display: true,
+              position: 'bottom',
+              labels: {{
+                color: '#E2E8F0',
+                font: {{ family: 'Pretendard, Inter', size: 10, weight: 600 }},
+                boxWidth: 10
+              }}
+            }},
+            datalabels: {{ display: false }}
           }}
         }}
-      }},
-      scales: {{
-        x: {{ stacked: true, grid: {{ color: '#1E2230' }}, ticks: {{ color: '#E2E8F0', font: {{ family: 'Pretendard, Inter', weight: 'bold' }} }} }},
-        y: {{
-          stacked: true,
-          min: 0,
-          max: 3500000,
-          grid: {{ color: '#1E2230' }},
-          ticks: {{
-            color: '#94A3B8',
-            font: {{ family: 'Outfit' }},
-            callback: {t['bar_y_format']}
-          }}
-        }}
-      }}
+      }});
     }}
-  }});
-
-  // Callout Box Plugin for Retention Curve
-  const cohortCalloutPlugin = {{
-    id: 'cohortCallout',
-    afterDraw(chart) {{
-      const {{ ctx, scales: {{ x, y }} }} = chart;
-      const meta = chart.getDatasetMeta(0);
-      const targetPoint = meta.data[12];
-      if (!targetPoint) return;
-
-      const tx = targetPoint.x;
-      const ty = targetPoint.y;
-
-      const bw = 175;
-      const bh = 26;
-      const bx = tx - bw - 15;
-      const by = ty - 45;
-
-      ctx.save();
-      ctx.strokeStyle = '#FF5C1E';
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([3, 3]);
-      ctx.moveTo(bx + bw * 0.7, by + bh);
-      ctx.lineTo(tx, ty - 12);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      
-      ctx.beginPath();
-      ctx.fillStyle = '#FF5C1E';
-      ctx.moveTo(tx, ty - 8);
-      ctx.lineTo(tx - 4, ty - 15);
-      ctx.lineTo(tx + 4, ty - 15);
-      ctx.closePath();
-      ctx.fill();
-      
-      ctx.fillStyle = '#0B0D13';
-      ctx.strokeStyle = '#FF5C1E';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.roundRect(bx, by, bw, bh, 4);
-      ctx.fill();
-      ctx.stroke();
-      
-      ctx.fillStyle = '#FFA07A';
-      ctx.font = 'bold 11px Pretendard, Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('{t["callout_text"]}', bx + bw / 2, by + bh / 2);
-      ctx.restore();
-    }}
-  }};
-
-  // 2. Retention Curve Chart
-  const ctxRet = document.getElementById('retentionChart').getContext('2d');
-  new Chart(ctxRet, {{
-    type: 'line',
-    data: {{
-      labels: D.weeks_list,
-      datasets: [
-        {{
-          label: '{t["leg_group_b"]}',
-          data: D.retention_curve_b,
-          borderColor: '#FF5C1E',
-          backgroundColor: 'rgba(255, 92, 30, 0.15)',
-          fill: true,
-          tension: 0.25,
-          borderWidth: 3,
-          pointBackgroundColor: '#FF5C1E',
-          pointRadius: 3
-        }},
-        {{
-          label: '{t["leg_group_a"]}',
-          data: D.retention_curve_a,
-          borderColor: '#94A3B8',
-          backgroundColor: 'rgba(148, 163, 184, 0.05)',
-          borderDash: [5, 5],
-          fill: true,
-          tension: 0.25,
-          borderWidth: 2,
-          pointBackgroundColor: '#94A3B8',
-          pointRadius: 2
-        }}
-      ]
-    }},
-    plugins: [ChartDataLabels, cohortCalloutPlugin],
-    options: {{
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: {{
-        padding: {{ right: 35, top: 25, left: 10, bottom: 10 }}
-      }},
-      plugins: {{
-        legend: {{
-          position: 'top',
-          labels: {{ color: '#E2E8F0', font: {{ family: 'Pretendard, Inter', size: 10, weight: 600 }}, boxWidth: 12 }}
-        }},
-        datalabels: {{
-          display: (ctx) => ctx.dataIndex === 0 || ctx.dataIndex === 6 || ctx.dataIndex === 12,
-          anchor: 'top',
-          align: 'top',
-          offset: 4,
-          color: function(ctx) {{
-            if (ctx.datasetIndex === 0 && ctx.dataIndex === 12) return '#FFA07A';
-            return ctx.datasetIndex === 0 ? '#FFFFFF' : '#94A3B8';
-          }},
-          font: {{ family: 'Outfit', weight: 'bold', size: 10 }},
-          formatter: (v) => v + '%'
-        }}
-      }},
-      scales: {{
-        x: {{ grid: {{ color: '#1E2230' }}, ticks: {{ color: '#94A3B8', font: {{ family: 'Outfit', size: 10 }} }} }},
-        y: {{ min: 0, max: 115, grid: {{ color: '#1E2230' }}, ticks: {{ color: '#94A3B8', font: {{ family: 'Outfit', size: 10 }}, callback: (v) => v + '%' }} }}
-      }}
-    }}
-  }});
-
-  // 3. Monthly GMV >= 1M KRW Ratio Pie/Donut Chart
-  const ctxPie = document.getElementById('storeCapPieChart').getContext('2d');
-  new Chart(ctxPie, {{
-    type: 'doughnut',
-    data: {{
-      labels: ['{t["panel3_leg_reach"]}', '{t["panel3_leg_under"]}'],
-      datasets: [{{
-        data: [13, 0],
-        backgroundColor: ['#10B981', '#334155'],
-        borderColor: '#181B26',
-        borderWidth: 3,
-        cutout: '68%'
-      }}]
-    }},
-    plugins: [ChartDataLabels, {{
-      id: 'centerText',
-      beforeDraw(chart) {{
-        const {{ width, height, ctx }} = chart;
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = '900 24px Outfit, Pretendard, Inter, sans-serif';
-        ctx.fillStyle = '#34D399';
-        ctx.fillText('100%', width / 2, height / 2 - 8);
-        ctx.font = '700 11px Pretendard, Inter, sans-serif';
-        ctx.fillStyle = '#94A3B8';
-        ctx.fillText('{t["panel3_center_sub"]}', width / 2, height / 2 + 12);
-        ctx.restore();
-      }}
-    }}],
-    options: {{
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {{
-        legend: {{
-          display: true,
-          position: 'bottom',
-          labels: {{
-            color: '#E2E8F0',
-            font: {{ family: 'Pretendard, Inter', size: 10, weight: 600 }},
-            boxWidth: 10
-          }}
-        }},
-        datalabels: {{ display: false }}
-      }}
-    }}
-  }});
+  }}
 
   // -------------------------------------------------------------
   // 4. INTERACTIVE STORE DATA FILTER ENGINE (VANILLA JS)
   // -------------------------------------------------------------
-  (function initInteractiveStoreFilter() {{
+  function initInteractiveStoreFilter() {{
     const tbody = document.getElementById('storeTableBody');
+    if (!tbody) return;
     const rows = Array.from(tbody.querySelectorAll('.store-row'));
     const brandChips = Array.from(document.querySelectorAll('.brand-chip'));
     const growthChips = Array.from(document.querySelectorAll('.growth-chip'));
@@ -1909,10 +1942,10 @@ def render_dashboard_html(lang='ko', switch_href='passorder1_dashboard_en.html')
       }}
 
       // Dynamic Stats Update
-      statCount.textContent = `${{visibleRows.length}} / 13`;
-      statDiff.textContent = (totalDiff >= 0 ? '+' : '') + totalDiff.toLocaleString() + currencySuffix;
+      if (statCount) statCount.textContent = `${{visibleRows.length}} / 13`;
+      if (statDiff) statDiff.textContent = (totalDiff >= 0 ? '+' : '') + totalDiff.toLocaleString() + currencySuffix;
       const avgGrowth = totalGmvA > 0 ? ((totalGmvB - totalGmvA) / totalGmvA * 100).toFixed(1) : '0.0';
-      statGrowth.textContent = '+' + avgGrowth + '%';
+      if (statGrowth) statGrowth.textContent = '+' + avgGrowth + '%';
     }}
 
     // Brand Chips Click
@@ -1936,39 +1969,90 @@ def render_dashboard_html(lang='ko', switch_href='passorder1_dashboard_en.html')
     }});
 
     // Search Input
-    searchInput.addEventListener('input', (e) => {{
-      currentSearch = e.target.value.trim().toLowerCase();
-      applyFilterAndSort();
-    }});
+    if (searchInput) {{
+      searchInput.addEventListener('input', (e) => {{
+        currentSearch = e.target.value.trim().toLowerCase();
+        applyFilterAndSort();
+      }});
+    }}
 
     // Sort Select
-    sortSelect.addEventListener('change', (e) => {{
-      currentSort = e.target.value;
-      applyFilterAndSort();
-    }});
+    if (sortSelect) {{
+      sortSelect.addEventListener('change', (e) => {{
+        currentSort = e.target.value;
+        applyFilterAndSort();
+      }});
+    }}
 
     // Reset Button
-    resetBtn.addEventListener('click', () => {{
-      currentBrand = 'ALL';
-      currentTier = 'ALL';
-      currentSearch = '';
-      currentSort = 'id-asc';
+    if (resetBtn) {{
+      resetBtn.addEventListener('click', () => {{
+        currentBrand = 'ALL';
+        currentTier = 'ALL';
+        currentSearch = '';
+        currentSort = 'id-asc';
 
-      brandChips.forEach(c => c.classList.remove('active'));
-      brandChips[0].classList.add('active');
+        brandChips.forEach(c => c.classList.remove('active'));
+        brandChips[0].classList.add('active');
 
-      growthChips.forEach(c => c.classList.remove('active'));
-      growthChips[0].classList.add('active');
+        growthChips.forEach(c => c.classList.remove('active'));
+        growthChips[0].classList.add('active');
 
-      searchInput.value = '';
-      sortSelect.value = 'id-asc';
+        if (searchInput) searchInput.value = '';
+        if (sortSelect) sortSelect.value = 'id-asc';
 
-      applyFilterAndSort();
-    }});
+        applyFilterAndSort();
+      }});
+    }}
 
     // Initial Trigger
     applyFilterAndSort();
-  }})();
+  }}
+
+  // -------------------------------------------------------------
+  // 5. BULLETPROOF INITIALIZATION (HTMLPreview & Async Resilient)
+  // -------------------------------------------------------------
+  let chartInitTries = 0;
+  function startDashboard() {{
+    if (typeof Chart === 'undefined') {{
+      chartInitTries++;
+      if (chartInitTries < 150) {{
+        setTimeout(startDashboard, 50);
+        return;
+      }}
+      console.warn('Chart.js CDN slow or blocked, attempting fallback load...');
+    }}
+
+    try {{
+      initCharts();
+    }} catch (e) {{
+      console.error('Error initializing charts:', e);
+    }}
+
+    try {{
+      initInteractiveStoreFilter();
+    }} catch (e) {{
+      console.error('Error initializing filters:', e);
+    }}
+  }}
+
+  // Fallback loader if external CDN is delayed or blocked in sandbox/iframe
+  setTimeout(function() {{
+    if (typeof Chart === 'undefined') {{
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js';
+      script.onload = function() {{
+        if (typeof Chart !== 'undefined') startDashboard();
+      }};
+      document.head.appendChild(script);
+    }}
+  }}, 800);
+
+  if (document.readyState === 'loading') {{
+    document.addEventListener('DOMContentLoaded', startDashboard);
+  }} else {{
+    startDashboard();
+  }}
 </script>
 
 </body>

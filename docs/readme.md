@@ -89,16 +89,14 @@
 
 ## 6. Dashboard Visualization Architecture (Tri-Chart Grid & Interactive Filter)
 
-Below is the production executive dashboard interface built for C-Level leadership. Click the dashboard preview image or the interactive launch buttons below to explore the live dashboard with real-time filtering:
+Below is the production executive dashboard interface built for C-Level leadership. The dashboard preview image is displayed directly below, and you can explore the live dashboard with real-time filtering via the interactive launch links:
 
 <p align="center">
-  <a href="index.html">
-    <img src="templates/passorder1_dashboard_en.jpg" alt="Pass Order Executive Dashboard Preview (English)" width="95%" />
-  </a>
+  <img src="../templates/passorder1_dashboard_en.jpg" alt="Pass Order Executive Dashboard Preview (English)" width="100%" />
 </p>
 
 <p align="center">
-  👉 <strong><a href="index.html">🚀 Click Here to Launch Interactive Dashboard (Live Filter & Search)</a></strong>
+  👉 <strong><a href="../index.html">🚀 Click Here to Launch Interactive Dashboard (Live Filter & Search)</a></strong>
   <br>
   <sub>(Direct standalone execution | Live interactive filtering across all 13 merchant cafes)</sub>
 </p>
@@ -114,7 +112,7 @@ Below is the production executive dashboard interface built for C-Level leadersh
 > 
 > * **Live Web Hosting (GitHub Pages)**: [https://sano035-design.github.io/passorder_additional_analysis-/](https://sano035-design.github.io/passorder_additional_analysis-/)
 > * **Instant HTMLPreview Demo**: [Open Interactive English Demo via HTMLPreview](https://htmlpreview.github.io/?https://github.com/sano035-design/passorder_additional_analysis-/blob/main/output/passorder1_dashboard_en.html)
-> * **Local File Execution**: Open [`output/passorder1_dashboard_en.html`](output/passorder1_dashboard_en.html) or [`index.html`](index.html) directly in any web browser.
+> * **Local File Execution**: Open [`output/passorder1_dashboard_en.html`](../output/passorder1_dashboard_en.html) or [`index.html`](../index.html) directly in any web browser.
 
 ```
 ┌─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┐
@@ -311,16 +309,14 @@ Start-Process "passorder1/output/passorder1_dashboard.html"
 
 ## 6. 대시보드 시각화 구조 (3대 차트 그리드 & 실시간 인터랙티브 필터)
 
-실제 구축된 프로덕션 C-Level 경영진 대시보드 인터페이스입니다. 대시보드 미리보기 이미지를 클릭하거나 아래의 전용 실행 링크를 통해 웹 브라우저에서 직접 매장별 필터링을 조작할 수 있는 인터랙티브 대시보드를 열람할 수 있습니다:
+실제 구축된 프로덕션 C-Level 경영진 대시보드 인터페이스입니다. 대시보드 미리보기 이미지가 본문에 바로 표시되며, 아래의 전용 실행 링크를 통해 웹 브라우저에서 직접 매장별 필터링을 조작할 수 있는 인터랙티브 대시보드를 열람할 수 있습니다:
 
 <p align="center">
-  <a href="index.html">
-    <img src="templates/passorder1_dashboard.jpg" alt="패스오더 경영진 대시보드 미리보기 (한국어)" width="95%" />
-  </a>
+  <img src="../templates/passorder1_dashboard.jpg" alt="패스오더 경영진 대시보드 미리보기 (한국어)" width="100%" />
 </p>
 
 <p align="center">
-  👉 <strong><a href="index.html">🚀 여기를 클릭하여 실시간 필터 인터랙티브 대시보드 열기</a></strong>
+  👉 <strong><a href="../index.html">🚀 여기를 클릭하여 실시간 필터 인터랙티브 대시보드 열기</a></strong>
   <br>
   <sub>(단일 독립 구동 HTML 대시보드 | 브라우저에서 13개 가맹점 실시간 필터 및 검색 직접 체험 가능)</sub>
 </p>
@@ -336,7 +332,7 @@ Start-Process "passorder1/output/passorder1_dashboard.html"
 > 
 > * **웹 라이브 호스팅 (GitHub Pages)**: [https://sano035-design.github.io/passorder_additional_analysis-/](https://sano035-design.github.io/passorder_additional_analysis-/)
 > * **HTMLPreview 즉시 실행 데모**: [HTMLPreview 한국어 인터랙티브 데모 바로가기](https://htmlpreview.github.io/?https://github.com/sano035-design/passorder_additional_analysis-/blob/main/output/passorder1_dashboard.html)
-> * **로컬 브라우저 직접 실행**: [`output/passorder1_dashboard.html`](output/passorder1_dashboard.html) 또는 [`index.html`](index.html) 더블클릭 실행
+> * **로컬 브라우저 직접 실행**: [`output/passorder1_dashboard.html`](../output/passorder1_dashboard.html) 또는 [`index.html`](../index.html) 더블클릭 실행
 
 ```
 ┌─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┐
