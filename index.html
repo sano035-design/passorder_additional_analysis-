@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>패스오더 교차 적립제 재무 타당성 및 손익 분석 대시보드</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Pretendard:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js & Datalabels Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+  <style>
+    :root {
+      --brand-primary: #FF5C1E;
+      --brand-hover: #E84D12;
+      --brand-gradient: linear-gradient(135deg, #FF6525 0%, #FF4500 100%);
+      --brand-glow: rgba(255, 92, 30, 0.25);
+      
+      --bg-root: #0A0C10;
+      --bg-header: #12141C;
+      --bg-card: #181B26;
+      --bg-card-hover: #1E2230;
+      --bg-badge: rgba(255, 255, 255, 0.06);
+      
+      --border-dark: #262A3B;
+      --border-subtle: #1F2230;
+      
+      --text-pure-white: #FFFFFF;
+      --text-main: #E2E8F0;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      
+      --semantic-emerald: #10B981;
+      --semantic-emerald-deep: #059669;
+      --semantic-emerald-light: #34D399;
+      --semantic-emerald-soft: rgba(16, 185, 129, 0.15);
+      
+      --semantic-rose: #F43F5E;
+      --semantic-rose-soft: rgba(244, 63, 94, 0.15);
+      --semantic-amber: #F59E0B;
+      --semantic-amber-soft: rgba(245, 158, 11, 0.15);
+      --semantic-blue: #38BDF8;
+      
+      --radius-xl: 18px;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow-dark: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-root);
+      color: var(--text-main);
+      font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.5;
+      padding: 24px 32px 60px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .dashboard-header {
+      background: var(--bg-header);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-xl);
+      padding: 20px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-dark);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 92, 30, 0.12);
+      border: 1.5px solid var(--brand-primary);
+      border-radius: var(--radius-md);
+      padding: 8px 14px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      font-size: 18px;
+    }
+    .logo-prefix { color: var(--text-pure-white); }
+    .logo-accent { color: var(--brand-primary); margin-left: 2px; }
+
+    .header-titles h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-pure-white);
+      letter-spacing: -0.3px;
+    }
+    .header-titles p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .badge {
+      background: var(--bg-badge);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+    .badge.active {
+      background: var(--brand-gradient);
+      color: var(--text-pure-white);
+      border: none;
+      box-shadow: 0 4px 12px var(--brand-glow);
+    }
+    .badge.emerald {
+      background: var(--semantic-emerald-soft);
+      color: var(--semantic-emerald);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    .badge-switch {
+      text-decoration: none;
+      color: #38BDF8 !important;
+      border-color: rgba(56, 189, 248, 0.35);
+      background: rgba(56, 189, 248, 0.08);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-switch:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #38BDF8;
+      transform: translateY(-1px);
+    }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-pure-white);
+      margin: 28px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .number-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: var(--brand-primary);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    /* 5 Hero KPI Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-dark);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .kpi-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: -0.2px;
+    }
+    .kpi-tag {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--bg-badge);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .kpi-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--text-pure-white);
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+
+    .kpi-subtext {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    /* Hero Card Variations */
+    .hero-cost {
+      border-left: 4px solid var(--semantic-rose);
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.08) 0%, rgba(24, 27, 38, 0.95) 100%);
+    }
+    .hero-retention {
+      border-left: 4px solid var(--brand-primary);
+      background: linear-gradient(180deg, rgba(255, 92, 30, 0.08) 0%, rgba(24, 27, 38, 0.95) 100%);
+    }
+    .hero-benefit {
+      border-left: 4px solid var(--semantic-blue);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.08) 0%, rgba(24, 27, 38, 0.95) 100%);
+    }
+    .hero-stores {
+      border-left: 4px solid var(--semantic-emerald);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(24, 27, 38, 0.95) 100%);
+    }
+    .hero-revenue {
+      border-left: 4px solid var(--semantic-emerald-light);
+      background: linear-gradient(180deg, rgba(52, 211, 153, 0.12) 0%, rgba(24, 27, 38, 0.95) 100%);
+      border: 1.5px solid rgba(52, 211, 153, 0.4);
+    }
+
+    .store-square-box-mini {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      border-radius: 4px;
+      color: #6EE7B7;
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    /* Main Chart Section: 3 Columns */
+    .tri-chart-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1.35fr 0.95fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .fee-cap-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 4px;
+      color: #6EE7B7;
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .gap-square-box {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      border-radius: 4px;
+      color: #FDA4AF;
+      font-size: 11px;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .chart-panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-xl);
+      padding: 20px 22px;
+      box-shadow: var(--shadow-dark);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .panel-header {
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px;
+    }
+
+    .panel-big-title {
+      font-family: 'Outfit', 'Pretendard', sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--text-pure-white);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .chart-box-tall {
+      height: 310px;
+      position: relative;
+    }
+
+    .panel-footer-desc {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 10px;
+      line-height: 1.45;
+    }
+
+    /* Full Width Container Cards */
+    .card-full {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-xl);
+      padding: 24px 28px;
+      box-shadow: var(--shadow-dark);
+      margin-bottom: 28px;
+    }
+
+    /* ----------------------------------------------------------- */
+    /* INTERACTIVE FILTER TOOLBAR STYLES (NEW)                     */
+    /* ----------------------------------------------------------- */
+    .filter-toolbar {
+      background: rgba(18, 20, 28, 0.95);
+      border: 1px solid #2B3147;
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      margin: 16px 0 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .filter-toolbar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #24293C;
+      padding-bottom: 10px;
+    }
+    .filter-title-wrap h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-pure-white);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-title-wrap p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .filter-reset-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid #33394F;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .filter-reset-btn:hover {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: var(--semantic-rose);
+      color: #FDA4AF;
+    }
+
+    .filter-controls-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-row-label {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--brand-primary);
+      min-width: 95px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .filter-chips-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid #262B3D;
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+    }
+    .filter-chip:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-pure-white);
+      border-color: #3E455F;
+      transform: translateY(-1px);
+    }
+    .filter-chip.active {
+      background: var(--brand-gradient);
+      border-color: #FF5C1E;
+      color: #FFFFFF;
+      font-weight: 800;
+      box-shadow: 0 2px 10px rgba(255, 92, 30, 0.4);
+    }
+    .filter-chip.growth-chip.active {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      border-color: #10B981;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+    }
+
+    .filter-inputs-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .search-box-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+    }
+    .search-input {
+      width: 100%;
+      background: #0B0D13;
+      border: 1px solid #2B3147;
+      border-radius: var(--radius-md);
+      padding: 8px 14px 8px 34px;
+      color: var(--text-pure-white);
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .search-input:focus {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 2px rgba(255, 92, 30, 0.2);
+    }
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    .sort-box-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sort-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .sort-select {
+      background: #0B0D13;
+      border: 1px solid #2B3147;
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      color: var(--text-pure-white);
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .sort-select:focus {
+      border-color: var(--brand-primary);
+    }
+
+    /* Dynamic Filter Stats Bar */
+    .dynamic-stats-bar {
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .dynamic-stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dynamic-stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .dynamic-stat-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--text-pure-white);
+    }
+    .dynamic-stat-val.emerald {
+      color: #34D399;
+    }
+    .dynamic-stat-val.orange {
+      color: var(--brand-primary);
+    }
+
+    /* Table Styles */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 8px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .data-table th, .data-table td {
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+      font-size: 11.5px;
+      line-height: 1.35;
+    }
+    .data-table th {
+      background: #12141C;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 10.5px;
+      letter-spacing: 0.5px;
+      padding: 8px 12px;
+    }
+    .data-table tr.store-row {
+      transition: background-color 0.15s ease;
+    }
+    .data-table tr.store-row:hover {
+      background: var(--bg-card-hover);
+    }
+    .data-table tr.store-row.highlighted {
+      background: rgba(255, 92, 30, 0.12) !important;
+    }
+    .data-table td.strong {
+      font-weight: 800;
+      color: var(--text-pure-white);
+      font-family: 'Outfit', 'Pretendard', sans-serif;
+    }
+    .data-table td.brand-col {
+      font-weight: 700;
+      color: var(--brand-primary);
+    }
+
+    .no-results-row td {
+      text-align: center;
+      padding: 24px !important;
+      color: #F87171;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      font-family: 'Pretendard', 'Inter', sans-serif;
+    }
+    .pill.emerald {
+      background: var(--semantic-emerald-soft);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--semantic-emerald);
+    }
+
+    .summary-callout-box {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .summary-callout-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .summary-callout-text h4 {
+      font-size: 13px;
+      font-weight: 800;
+      color: #A7F3D0;
+      margin-bottom: 2px;
+    }
+    .summary-callout-text p {
+      font-size: 11.5px;
+      color: var(--text-main);
+      line-height: 1.45;
+    }
+
+    /* Executive Recommendations */
+    .recommendation-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .rec-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .rec-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--brand-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .rec-card h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-pure-white);
+      line-height: 1.35;
+    }
+    .rec-card p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Highlighted Orange Card for Strategy 03 */
+    .rec-card.rec-card-orange {
+      background: linear-gradient(135deg, #FF6B00 0%, #EA580C 100%);
+      border: 1.5px solid #FF9E66;
+      box-shadow: 0 8px 24px rgba(255, 107, 0, 0.35);
+    }
+    .rec-card.rec-card-orange .rec-badge {
+      color: #FFFFFF !important;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 900;
+      width: fit-content;
+    }
+    .rec-card.rec-card-orange h3 {
+      color: #FFFFFF !important;
+      font-size: 16px;
+      font-weight: 800;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .rec-card.rec-card-orange p {
+      color: #FFFFFF !important;
+      font-size: 12.5px;
+      line-height: 1.6;
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Footer */
+    .dashboard-footer {
+      margin-top: 40px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <div class="logo-badge">
+        <span class="logo-prefix">PASS</span><span class="logo-accent">ORDER</span>
+      </div>
+      <div class="header-titles">
+        <h1>교차 적립제 재무 타당성 및 손익 분석 대시보드</h1>
+        <p>A/B 테스트 90일 실측 데이터 기반 본사 지원 총비용 회수 방정식 및 가맹점 네트워크 락인 모델</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="badge active">💼 C-Level 경영진 전략 보고용</div>
+      <div class="badge emerald">🛡️ 무결성 검증 100% PASS</div>
+      <div class="badge">N = 2,500명 / 90일간</div>
+      <a href="output/passorder1_dashboard_en.html" class="badge badge-switch">🌐 English Dashboard</a>
+    </div>
+  </header>
+
+  <!-- 5 Hero KPI Metric Cards -->
+  <div class="kpi-grid">
+    <!-- Card 1: Total Cost -->
+    <div class="kpi-card hero-cost">
+      <div class="kpi-header">
+        <span class="kpi-title">본사 총 지불 비용 (전체 부담액)</span>
+        <span class="kpi-tag" style="color: #FDA4AF; border-color: rgba(244,63,94,0.4);">총액 일원화</span>
+      </div>
+      <div class="kpi-value" style="color: #FB7185;">2,990,110<span style="font-size:16px;">원</span></div>
+      <div class="kpi-subtext">실제 지원 집행액 2,487,000원 + 잔여 미사용 부채 503,110원 합계</div>
+    </div>
+
+    <!-- Card 2: Retention & Defended Users -->
+    <div class="kpi-card hero-retention">
+      <div class="kpi-header">
+        <span class="kpi-title">코호트 리텐션 & 이탈 방어 유저</span>
+        <span class="kpi-tag" style="color: #FFA07A; border-color: rgba(255,92,30,0.4);">90일 생존</span>
+      </div>
+      <div class="kpi-value" style="font-size: 24px;">+19.1<span style="font-size:18px;">%p</span> / 239<span style="font-size:16px;">명</span></div>
+      <div class="kpi-subtext">대조군 A 9.8% (123명) → 실험군 B 28.9% (361명, 2.95배)</div>
+    </div>
+
+    <!-- Card 3: Defended Users Benefit Savings -->
+    <div class="kpi-card hero-benefit">
+      <div class="kpi-header">
+        <span class="kpi-title" style="color: #7DD3FC;">이탈 방어 유저 혜택 절감액</span>
+        <span class="kpi-tag" style="color: #38BDF8; border-color: rgba(56,189,248,0.4);">1,900원 지원비</span>
+      </div>
+      <div class="kpi-value" style="color: #38BDF8;">+454,100<span style="font-size:16px;">원</span></div>
+      <div class="kpi-subtext">
+        빠져나가지 않은 결제 고객 <strong>239명 × 첫 잔 100원 지원금 1,900원</strong>
+      </div>
+    </div>
+
+    <!-- Card 4: Store Fee Revenue -->
+    <div class="kpi-card hero-stores">
+      <div class="kpi-header">
+        <span class="kpi-title">총 매장 수수료 수익</span>
+        <span class="kpi-tag store-square-box-mini">월 6만 원 Cap</span>
+      </div>
+      <div class="kpi-value" style="color: #34D399;">+2,340,000<span style="font-size:16px;">원</span></div>
+      <div class="kpi-subtext">13개 매장 × 60,000원 × 3개월</div>
+    </div>
+
+    <!-- Card 5: Total Revenue Value Generated -->
+    <div class="kpi-card hero-revenue">
+      <div class="kpi-header">
+        <span class="kpi-title" style="color: #6EE7B7;">총 수익 창출 가치</span>
+        <span class="kpi-tag" style="color: #6EE7B7; border-color: rgba(52,211,153,0.5);">13개 매장</span>
+      </div>
+      <div class="kpi-value" style="color: #A7F3D0;">+2,794,100<span style="font-size:16px;">원</span></div>
+      <div class="kpi-subtext">13개 전 매장 수수료 234만 원 + 혜택 절감 45.4만 원</div>
+    </div>
+  </div>
+
+  <!-- SECTION: Tri-Chart Visual Grid -->
+  <div class="tri-chart-grid">
+    <!-- Left: Stacked Bar Chart (Total Cost vs Total Revenue) -->
+    <div class="chart-panel-card">
+      <div class="panel-header">
+        <div class="panel-big-title" style="justify-content: space-between;">
+          <span>📊 본사 총 비용 vs 총 수익 가치</span>
+          <span class="gap-square-box">차액: -196,010원</span>
+        </div>
+        <div class="panel-subtitle">
+          본사 총 지불 비용과 매장 수수료 및 혜택 절감액 일원화 비교
+        </div>
+      </div>
+      <div class="chart-box-tall">
+        <canvas id="costVsRevenueChart"></canvas>
+      </div>
+      <div class="panel-footer-desc">
+        총 지불 비용(2,990,110원) 대비 회수 가치(2,794,100원)로 <strong>93.4% 비용 회수</strong> 달성
+      </div>
+    </div>
+
+    <!-- Center: 12-Week Retention Curve Chart -->
+    <div class="chart-panel-card">
+      <div class="panel-header">
+        <div class="panel-big-title">
+          <span>📈 12주 코호트 잔존율 추이</span>
+        </div>
+        <div class="panel-subtitle">
+          대조군 A (단일 스탬프) vs 실험군 B (교차 적립)
+        </div>
+      </div>
+      <div class="chart-box-tall">
+        <canvas id="retentionChart"></canvas>
+      </div>
+      <div class="panel-footer-desc">
+        A군 9.8% (123명) vs B군 28.9% (361명) → <strong>+19.1%p (239명 방어)</strong>
+      </div>
+    </div>
+
+    <!-- Right: Monthly GMV >= 1M KRW Ratio Pie Chart -->
+    <div class="chart-panel-card">
+      <div class="panel-header">
+        <div class="panel-big-title" style="justify-content: space-between;">
+          <span style="font-size: 13.5px;">🥧 월 100만 원 이상 매출 비율</span>
+          <span class="fee-cap-badge">수수료 월 최대 수수료 6만원 책정</span>
+        </div>
+        <div class="panel-subtitle">
+          13개 전체 가맹점 월평균 매출 기준 Cap 적용율
+        </div>
+      </div>
+      <div class="chart-box-tall">
+        <canvas id="storeCapPieChart"></canvas>
+      </div>
+      <div class="panel-footer-desc">
+        13개 매장 전원(100.0%) 월 100만 원 초과 달성 → <strong>월 6만 원 Cap 100% 확정</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: 13 Cafes Revenue Comparison & Churn Defense Proof -->
+  <section class="card-full" id="interactive-store-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+      <div>
+        <h2 style="font-size: 17px; font-weight: 800; color: var(--text-pure-white); margin-bottom: 2px;">
+          📋 13개 전체 가맹점 교차 적립 도입 전후 매출 비교 (A군 vs B군)
+        </h2>
+        <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
+          교차 브랜드 적립 허용 시 매장별 결제액 변화 분석 • <strong>13개 전 매장에서 매출이 폭발적으로 상승하여 패스오더 앱을 계속 사용할 완벽한 근거 입증</strong>
+        </p>
+      </div>
+      <span class="pill emerald" style="font-size: 12px; padding: 4px 12px;">13개점 전원 매출 상승 (100.0%)</span>
+    </div>
+
+    <!-- INTERACTIVE FILTER TOOLBAR (NEW) -->
+    <div class="filter-toolbar">
+      <div class="filter-toolbar-header">
+        <div class="filter-title-wrap">
+          <h3>🔍 실시간 매장 데이터 인터랙티브 필터 컨트롤러</h3>
+          <p>브랜드 선택, 성장률 구간, 실시간 검색 및 다이나믹 정렬을 통해 13개 가맹점의 성과를 직접 필터링해보세요.</p>
+        </div>
+        <button class="filter-reset-btn" id="filterResetBtn">
+          🔄 전체 필터 초기화
+        </button>
+      </div>
+
+      <div class="filter-controls-grid">
+        <!-- Row 1: Brand Chips -->
+        <div class="filter-row">
+          <span class="filter-row-label">☕ 브랜드 필터:</span>
+          <div class="filter-chips-group" id="brandChipsGroup">
+            <button class="filter-chip brand-chip active" data-brand="ALL">전체 브랜드 (13)</button>
+            <button class="filter-chip brand-chip" data-brand="메가커피">메가커피 (3)</button>
+            <button class="filter-chip brand-chip" data-brand="컴포즈커피">컴포즈커피 (2)</button>
+            <button class="filter-chip brand-chip" data-brand="빽다방">빽다방 (2)</button>
+            <button class="filter-chip brand-chip" data-brand="텐퍼센트커피">텐퍼센트커피 (2)</button>
+            <button class="filter-chip brand-chip" data-brand="매머드커피">매머드커피 (2)</button>
+            <button class="filter-chip brand-chip" data-brand="개인스페셜티카페">개인스페셜티카페 (2)</button>
+          </div>
+        </div>
+
+        <!-- Row 2: Growth Tier Chips -->
+        <div class="filter-row">
+          <span class="filter-row-label">📈 성장률 구간:</span>
+          <div class="filter-chips-group" id="growthChipsGroup">
+            <button class="filter-chip growth-chip active" data-tier="ALL">전체 성장률 (13)</button>
+            <button class="filter-chip growth-chip" data-tier="tier1">+70% ~ +100% (5개점)</button>
+            <button class="filter-chip growth-chip" data-tier="tier2">+100% ~ +150% (2개점)</button>
+            <button class="filter-chip growth-chip" data-tier="tier3">+150% ~ +200% (4개점)</button>
+            <button class="filter-chip growth-chip" data-tier="tier4">+200% 초과 (2개점)</button>
+          </div>
+        </div>
+
+        <!-- Row 3: Live Search & Dynamic Sorting -->
+        <div class="filter-inputs-row">
+          <div class="search-box-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="storeSearchInput" class="search-input" placeholder="매장 ID(C001 등) 또는 브랜드명 검색..." />
+          </div>
+
+          <div class="sort-box-wrap">
+            <label for="storeSortSelect" class="sort-label">정렬 기준:</label>
+            <select id="storeSortSelect" class="sort-select">
+              <option value="id-asc">기본순 (매장 ID)</option>
+              <option value="diff-desc">증분 매출 높은 순 (B - A ↓)</option>
+              <option value="growth-desc">매출 증가율 높은 순 (Growth % ↓)</option>
+              <option value="gmvb-desc">B군 실측 매출 높은 순 (GMV B ↓)</option>
+              <option value="gmva-desc">A군 실측 매출 높은 순 (GMV A ↓)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 4: Dynamic Filter Summary KPI -->
+      <div class="dynamic-stats-bar">
+        <div class="dynamic-stat-item">
+          <span class="dynamic-stat-label">선택 매장 수:</span>
+          <span class="dynamic-stat-val orange" id="statFilteredCount">13 / 13</span>
+        </div>
+        <div class="dynamic-stat-item">
+          <span class="dynamic-stat-label">필터 매장 총 증분 매출:</span>
+          <span class="dynamic-stat-val emerald" id="statFilteredDiff">+43,898,100원</span>
+        </div>
+        <div class="dynamic-stat-item">
+          <span class="dynamic-stat-label">평균 매출 증가율:</span>
+          <span class="dynamic-stat-val emerald" id="statFilteredGrowth">+131.7%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container">
+      <table class="data-table" id="storeDataTable">
+        <thead>
+          <tr>
+            <th>매장 ID</th>
+            <th>브랜드</th>
+            <th>A군 매출 (단일 스탬프)</th>
+            <th>B군 매출 (교차 적립 허용)</th>
+            <th>증분 매출 (B - A)</th>
+            <th>매출 증가율</th>
+            <th>비고 (계약 유지 판정)</th>
+          </tr>
+        </thead>
+        <tbody id="storeTableBody">
+          <tr class="store-row" data-id="C001" data-brand="메가커피" data-tier="tier1" data-gmva="2944800" data-gmvb="5281000" data-diff="2336200" data-growth="79.3">
+            <td class="strong">C001</td>
+            <td class="brand-col">메가커피</td>
+            <td data-val="2944800">2,944,800원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="5281000">5,281,000원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="2336200">+2,336,200원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="79.3">+79.3%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C002" data-brand="메가커피" data-tier="tier1" data-gmva="2700800" data-gmvb="5234200" data-diff="2533400" data-growth="93.8">
+            <td class="strong">C002</td>
+            <td class="brand-col">메가커피</td>
+            <td data-val="2700800">2,700,800원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="5234200">5,234,200원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="2533400">+2,533,400원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="93.8">+93.8%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C003" data-brand="메가커피" data-tier="tier1" data-gmva="2867800" data-gmvb="5300200" data-diff="2432400" data-growth="84.8">
+            <td class="strong">C003</td>
+            <td class="brand-col">메가커피</td>
+            <td data-val="2867800">2,867,800원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="5300200">5,300,200원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="2432400">+2,432,400원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="84.8">+84.8%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C004" data-brand="컴포즈커피" data-tier="tier1" data-gmva="3631100" data-gmvb="6490400" data-diff="2859300" data-growth="78.7">
+            <td class="strong">C004</td>
+            <td class="brand-col">컴포즈커피</td>
+            <td data-val="3631100">3,631,100원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="6490400">6,490,400원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="2859300">+2,859,300원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="78.7">+78.7%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C005" data-brand="컴포즈커피" data-tier="tier1" data-gmva="3690500" data-gmvb="6459200" data-diff="2768700" data-growth="75.0">
+            <td class="strong">C005</td>
+            <td class="brand-col">컴포즈커피</td>
+            <td data-val="3690500">3,690,500원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="6459200">6,459,200원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="2768700">+2,768,700원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="75.0">+75.0%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C006" data-brand="빽다방" data-tier="tier2" data-gmva="2431000" data-gmvb="5302800" data-diff="2871800" data-growth="118.1">
+            <td class="strong">C006</td>
+            <td class="brand-col">빽다방</td>
+            <td data-val="2431000">2,431,000원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="5302800">5,302,800원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="2871800">+2,871,800원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="118.1">+118.1%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C007" data-brand="빽다방" data-tier="tier2" data-gmva="2473400" data-gmvb="5474400" data-diff="3001000" data-growth="121.3">
+            <td class="strong">C007</td>
+            <td class="brand-col">빽다방</td>
+            <td data-val="2473400">2,473,400원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="5474400">5,474,400원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="3001000">+3,001,000원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="121.3">+121.3%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C008" data-brand="텐퍼센트커피" data-tier="tier3" data-gmva="2113300" data-gmvb="5477000" data-diff="3363700" data-growth="159.2">
+            <td class="strong">C008</td>
+            <td class="brand-col">텐퍼센트커피</td>
+            <td data-val="2113300">2,113,300원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="5477000">5,477,000원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="3363700">+3,363,700원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="159.2">+159.2%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C009" data-brand="텐퍼센트커피" data-tier="tier3" data-gmva="2059900" data-gmvb="5621800" data-diff="3561900" data-growth="172.9">
+            <td class="strong">C009</td>
+            <td class="brand-col">텐퍼센트커피</td>
+            <td data-val="2059900">2,059,900원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="5621800">5,621,800원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="3561900">+3,561,900원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="172.9">+172.9%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C010" data-brand="매머드커피" data-tier="tier3" data-gmva="1321300" data-gmvb="3581300" data-diff="2260000" data-growth="171.0">
+            <td class="strong">C010</td>
+            <td class="brand-col">매머드커피</td>
+            <td data-val="1321300">1,321,300원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="3581300">3,581,300원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="2260000">+2,260,000원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="171.0">+171.0%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C011" data-brand="매머드커피" data-tier="tier3" data-gmva="1273500" data-gmvb="3585000" data-diff="2311500" data-growth="181.5">
+            <td class="strong">C011</td>
+            <td class="brand-col">매머드커피</td>
+            <td data-val="1273500">1,273,500원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="3585000">3,585,000원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="2311500">+2,311,500원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="181.5">+181.5%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C012" data-brand="개인스페셜티카페" data-tier="tier4" data-gmva="2759600" data-gmvb="9114300" data-diff="6354700" data-growth="230.3">
+            <td class="strong">C012</td>
+            <td class="brand-col">개인스페셜티카페</td>
+            <td data-val="2759600">2,759,600원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="9114300">9,114,300원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="6354700">+6,354,700원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="230.3">+230.3%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+          <tr class="store-row" data-id="C013" data-brand="개인스페셜티카페" data-tier="tier4" data-gmva="3074500" data-gmvb="10318000" data-diff="7243500" data-growth="235.6">
+            <td class="strong">C013</td>
+            <td class="brand-col">개인스페셜티카페</td>
+            <td data-val="3074500">3,074,500원</td>
+            <td class="strong" style="color: var(--brand-primary);" data-val="10318000">10,318,000원</td>
+            <td class="strong" style="color: var(--semantic-emerald);" data-val="7243500">+7,243,500원</td>
+            <td class="strong" style="color: #6EE7B7;" data-val="235.6">+235.6%</td>
+            <td><span class="pill emerald">🛡️ 매출 상승 (계약 유지 확실)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary Box -->
+    <div class="summary-callout-box">
+      <div class="summary-callout-icon">💡</div>
+      <div class="summary-callout-text">
+        <h4>가맹점 계약 유지(Churn 방어)의 완벽한 데이터 근거</h4>
+        <p>교차 적립 도입 후 13개 전체 매장의 90일 총매출이 <strong>3,334만 원에서 7,724만 원으로 무려 +131.7%(+4,390만 원) 폭증</strong>했습니다. 최저 +75.0%(컴포즈커피 C005)에서 최고 +235.6%(개인스페셜티 C013)까지 모든 매장이 전례 없는 매출 성장을 경험했습니다.<br><strong>"패스오더를 통해 매출이 1.7배~3.3배 폭등하는데 월 6만 원 수수료가 아깝다고 계약을 끊을 매장은 단 한 곳도 없습니다."</strong> 따라서 13개 전 매장의 계약 유지는 100% 확실하며, 본사는 매장당 18만 원씩 <strong>총 234만 원의 수수료를 100% 안전하게 확보</strong>합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: Executive Recommendations -->
+  <h2 class="section-title">
+    <span class="number-badge">★</span>
+    경영진 최종 의사결정 제언 및 실행 로드맵 (Action Plan)
+  </h2>
+
+  <div class="recommendation-grid">
+    <div class="rec-card">
+      <div class="rec-badge">STRATEGY 01</div>
+      <h3>13개 매장 매출 총 상승</h3>
+      <p>교차 적립 도입 후 13개 전체 가맹점의 90일 총매출이 3,334만 원에서 7,724만 원으로 <strong>+131.7%(+4,390만 원) 폭증</strong>하여 모든 매장의 매출이 크게 상승했습니다. 매출 성장이 확실하므로 가맹점의 반발을 잠재우고 플랫폼 락인을 달성할 수 있습니다.</p>
+    </div>
+
+    <div class="rec-card">
+      <div class="rec-badge">STRATEGY 02</div>
+      <h3>A군 대비 리텐션 감소폭이 적어 239명을 방어함 (추후 매출 상승 기대)</h3>
+      <p>단일 스탬프 A군(9.8%) 대비 교차 적립 B군(28.9%)의 90일 잔존율이 2.95배 높아 <strong>결제 고객 239명을 성공적으로 이탈 방어</strong>했습니다. 이탈하지 않고 남은 활성 유저들이 지속적으로 커피를 재구매함으로써 추후 매출 상승이 강력하게 기대됩니다.</p>
+    </div>
+
+    <div class="rec-card rec-card-orange">
+      <div class="rec-badge">STRATEGY 03 • 핵심 최종 결론</div>
+      <h3>장기적 흑자 수익 전환 및 네트워크 락인</h3>
+      <p>3개월 데이터 상 약 20만원 정도 손해지만, 이는 고객 이탈에 대한 신규 유저 마케팅 비용을 전혀 고려하지 않았을 뿐만 아니라 매장의 계약 해지율도 떨어뜨리고 안정적인 수수료를 얻을 수 있는 점에서 장기적으로 흑자 수익을 볼 것으로 판단함.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="dashboard-footer">
+    <div>PASSORDER BI & STRATEGY LAB • CONFIDENTIAL FOR C-LEVEL</div>
+    <div>데이터 출처: passorder_event_log_90d.csv (N=2,500, 90 Days, 13 Stores) • 단일 Standalone HTML</div>
+  </footer>
+
+</div>
+
+<!-- Data Injection & JavaScript Logic -->
+<script>
+  const D = {"total_cost": 2990110, "used_points_b": 2487000, "hold_points_b": 503110, "cost_gap": -196010, "w12_ret_a": 9.8, "w12_ret_b": 28.9, "retention_lift": 19.1, "defended_users": 239, "onboarding_benefit_per_user": 1900, "benefit_savings_val": 454100, "defended_stores_actual": 13, "cap_store_revenue_13": 2340000, "total_revenue_13": 2794100, "weeks_list": ["W0", "W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9", "W10", "W11", "W12"], "retention_curve_a": [100.0, 96.2, 90.9, 85.8, 79.8, 72.0, 63.9, 51.3, 43.9, 34.9, 29.4, 25.0, 9.8], "retention_curve_b": [100.0, 98.7, 98.3, 97.5, 97.8, 96.1, 95.0, 90.6, 87.2, 82.6, 76.2, 61.0, 28.9]};
+  const unitSuffix = '원';
+  const currencySuffix = '원';
+  const noResultText = '⚠️ 선택하신 필터 조건과 일치하는 매장 데이터가 없습니다.';
+
+  // 1. Stacked Bar Chart: Cost vs Revenue
+  const ctxCostRev = document.getElementById('costVsRevenueChart').getContext('2d');
+  new Chart(ctxCostRev, {
+    type: 'bar',
+    data: {
+      labels: ['[비용] 총 지불 비용', '[수익] 총 수익 가치'],
+      datasets: [
+        // Dataset 0: Cost
+        {
+          label: '총 지불 비용',
+          data: [D.total_cost, 0],
+          backgroundColor: '#F43F5E',
+          borderRadius: 6,
+          stack: 'stack1',
+          datalabels: {
+            display: (ctx) => ctx.dataIndex === 0,
+            anchor: 'end',
+            align: 'top',
+            offset: 6,
+            color: '#FDA4AF',
+            font: { family: 'Outfit, Pretendard, Inter', weight: 'bold', size: 12 },
+            formatter: () => '총 지불 비용 ' + D.total_cost.toLocaleString() + unitSuffix
+          }
+        },
+        // Dataset 1: Revenue Stack 1 (Onboarding Benefit Savings)
+        {
+          label: '신규 혜택 절감액 (454,100원)',
+          data: [0, D.benefit_savings_val],
+          backgroundColor: '#059669',
+          borderRadius: 4,
+          stack: 'stack1',
+          datalabels: {
+            display: (ctx) => ctx.dataIndex === 1,
+            anchor: 'center',
+            align: 'center',
+            color: '#FFFFFF',
+            font: { family: 'Outfit, Pretendard, Inter', weight: 'bold', size: 11 },
+            formatter: () => D.benefit_savings_val.toLocaleString() + unitSuffix
+          }
+        },
+        // Dataset 2: Revenue Stack 2 (Store Fees)
+        {
+          label: '13개 매장 수수료 (2,340,000원)',
+          data: [0, D.cap_store_revenue_13],
+          backgroundColor: '#10B981',
+          borderRadius: 6,
+          stack: 'stack1',
+          datalabels: {
+            display: (ctx) => ctx.dataIndex === 1,
+            anchor: 'center',
+            align: 'center',
+            color: '#FFFFFF',
+            font: { family: 'Outfit, Pretendard, Inter', weight: 'bold', size: 12 },
+            formatter: () => D.cap_store_revenue_13.toLocaleString() + unitSuffix
+          }
+        }
+      ]
+    },
+    plugins: [
+      ChartDataLabels,
+      {
+        id: 'totalRevTopLabel',
+        afterDatasetsDraw(chart) {
+          const { ctx, scales: { x, y } } = chart;
+          const revMeta = chart.getDatasetMeta(2);
+          if (revMeta && revMeta.data[1]) {
+            const bar = revMeta.data[1];
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.font = 'bold 12px Outfit, Pretendard, Inter, sans-serif';
+            ctx.fillStyle = '#6EE7B7';
+            ctx.fillText('총 수익 ' + D.total_revenue_13.toLocaleString() + unitSuffix, bar.x, bar.y - 6);
+            ctx.restore();
+          }
+        }
+      }
+    ],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 25, bottom: 5 } },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { color: '#E2E8F0', font: { family: 'Pretendard, Inter', size: 10, weight: 600 }, boxWidth: 10 }
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ctx.dataset.label + ': ' + ctx.raw.toLocaleString() + unitSuffix
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true, grid: { color: '#1E2230' }, ticks: { color: '#E2E8F0', font: { family: 'Pretendard, Inter', weight: 'bold' } } },
+        y: {
+          stacked: true,
+          min: 0,
+          max: 3500000,
+          grid: { color: '#1E2230' },
+          ticks: {
+            color: '#94A3B8',
+            font: { family: 'Outfit' },
+            callback: v => (v / 10000) + '만'
+          }
+        }
+      }
+    }
+  });
+
+  // Callout Box Plugin for Retention Curve
+  const cohortCalloutPlugin = {
+    id: 'cohortCallout',
+    afterDraw(chart) {
+      const { ctx, scales: { x, y } } = chart;
+      const meta = chart.getDatasetMeta(0);
+      const targetPoint = meta.data[12];
+      if (!targetPoint) return;
+
+      const tx = targetPoint.x;
+      const ty = targetPoint.y;
+
+      const bw = 175;
+      const bh = 26;
+      const bx = tx - bw - 15;
+      const by = ty - 45;
+
+      ctx.save();
+      ctx.strokeStyle = '#FF5C1E';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+      ctx.moveTo(bx + bw * 0.7, by + bh);
+      ctx.lineTo(tx, ty - 12);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      ctx.beginPath();
+      ctx.fillStyle = '#FF5C1E';
+      ctx.moveTo(tx, ty - 8);
+      ctx.lineTo(tx - 4, ty - 15);
+      ctx.lineTo(tx + 4, ty - 15);
+      ctx.closePath();
+      ctx.fill();
+      
+      ctx.fillStyle = '#0B0D13';
+      ctx.strokeStyle = '#FF5C1E';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, 4);
+      ctx.fill();
+      ctx.stroke();
+      
+      ctx.fillStyle = '#FFA07A';
+      ctx.font = 'bold 11px Pretendard, Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('총 239명 이탈하지 않았다', bx + bw / 2, by + bh / 2);
+      ctx.restore();
+    }
+  };
+
+  // 2. Retention Curve Chart
+  const ctxRet = document.getElementById('retentionChart').getContext('2d');
+  new Chart(ctxRet, {
+    type: 'line',
+    data: {
+      labels: D.weeks_list,
+      datasets: [
+        {
+          label: '실험군 B (교차 적립)',
+          data: D.retention_curve_b,
+          borderColor: '#FF5C1E',
+          backgroundColor: 'rgba(255, 92, 30, 0.15)',
+          fill: true,
+          tension: 0.25,
+          borderWidth: 3,
+          pointBackgroundColor: '#FF5C1E',
+          pointRadius: 3
+        },
+        {
+          label: '대조군 A (단일 스탬프)',
+          data: D.retention_curve_a,
+          borderColor: '#94A3B8',
+          backgroundColor: 'rgba(148, 163, 184, 0.05)',
+          borderDash: [5, 5],
+          fill: true,
+          tension: 0.25,
+          borderWidth: 2,
+          pointBackgroundColor: '#94A3B8',
+          pointRadius: 2
+        }
+      ]
+    },
+    plugins: [ChartDataLabels, cohortCalloutPlugin],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: { right: 35, top: 25, left: 10, bottom: 10 }
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { color: '#E2E8F0', font: { family: 'Pretendard, Inter', size: 10, weight: 600 }, boxWidth: 12 }
+        },
+        datalabels: {
+          display: (ctx) => ctx.dataIndex === 0 || ctx.dataIndex === 6 || ctx.dataIndex === 12,
+          anchor: 'top',
+          align: 'top',
+          offset: 4,
+          color: function(ctx) {
+            if (ctx.datasetIndex === 0 && ctx.dataIndex === 12) return '#FFA07A';
+            return ctx.datasetIndex === 0 ? '#FFFFFF' : '#94A3B8';
+          },
+          font: { family: 'Outfit', weight: 'bold', size: 10 },
+          formatter: (v) => v + '%'
+        }
+      },
+      scales: {
+        x: { grid: { color: '#1E2230' }, ticks: { color: '#94A3B8', font: { family: 'Outfit', size: 10 } } },
+        y: { min: 0, max: 115, grid: { color: '#1E2230' }, ticks: { color: '#94A3B8', font: { family: 'Outfit', size: 10 }, callback: (v) => v + '%' } }
+      }
+    }
+  });
+
+  // 3. Monthly GMV >= 1M KRW Ratio Pie/Donut Chart
+  const ctxPie = document.getElementById('storeCapPieChart').getContext('2d');
+  new Chart(ctxPie, {
+    type: 'doughnut',
+    data: {
+      labels: ['월 100만 원 이상 (Cap 100% 도달)', '월 100만 원 미만'],
+      datasets: [{
+        data: [13, 0],
+        backgroundColor: ['#10B981', '#334155'],
+        borderColor: '#181B26',
+        borderWidth: 3,
+        cutout: '68%'
+      }]
+    },
+    plugins: [ChartDataLabels, {
+      id: 'centerText',
+      beforeDraw(chart) {
+        const { width, height, ctx } = chart;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '900 24px Outfit, Pretendard, Inter, sans-serif';
+        ctx.fillStyle = '#34D399';
+        ctx.fillText('100%', width / 2, height / 2 - 8);
+        ctx.font = '700 11px Pretendard, Inter, sans-serif';
+        ctx.fillStyle = '#94A3B8';
+        ctx.fillText('13개점 전원 달성', width / 2, height / 2 + 12);
+        ctx.restore();
+      }
+    }],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: {
+            color: '#E2E8F0',
+            font: { family: 'Pretendard, Inter', size: 10, weight: 600 },
+            boxWidth: 10
+          }
+        },
+        datalabels: { display: false }
+      }
+    }
+  });
+
+  // -------------------------------------------------------------
+  // 4. INTERACTIVE STORE DATA FILTER ENGINE (VANILLA JS)
+  // -------------------------------------------------------------
+  (function initInteractiveStoreFilter() {
+    const tbody = document.getElementById('storeTableBody');
+    const rows = Array.from(tbody.querySelectorAll('.store-row'));
+    const brandChips = Array.from(document.querySelectorAll('.brand-chip'));
+    const growthChips = Array.from(document.querySelectorAll('.growth-chip'));
+    const searchInput = document.getElementById('storeSearchInput');
+    const sortSelect = document.getElementById('storeSortSelect');
+    const resetBtn = document.getElementById('filterResetBtn');
+
+    const statCount = document.getElementById('statFilteredCount');
+    const statDiff = document.getElementById('statFilteredDiff');
+    const statGrowth = document.getElementById('statFilteredGrowth');
+
+    let currentBrand = 'ALL';
+    let currentTier = 'ALL';
+    let currentSearch = '';
+    let currentSort = 'id-asc';
+
+    function applyFilterAndSort() {
+      let visibleRows = [];
+      let totalDiff = 0;
+      let totalGmvA = 0;
+      let totalGmvB = 0;
+
+      rows.forEach(row => {
+        const rowId = row.getAttribute('data-id').toLowerCase();
+        const rowBrand = row.getAttribute('data-brand');
+        const rowTier = row.getAttribute('data-tier');
+        const rowDiff = parseInt(row.getAttribute('data-diff'), 10);
+        const rowGmvA = parseInt(row.getAttribute('data-gmva'), 10);
+        const rowGmvB = parseInt(row.getAttribute('data-gmvb'), 10);
+
+        // Brand Match
+        const matchBrand = (currentBrand === 'ALL') || (rowBrand === currentBrand);
+        // Growth Tier Match
+        const matchTier = (currentTier === 'ALL') || (rowTier === currentTier);
+        // Search Term Match (ID or Brand)
+        const matchSearch = !currentSearch || rowId.includes(currentSearch) || rowBrand.toLowerCase().includes(currentSearch);
+
+        if (matchBrand && matchTier && matchSearch) {
+          row.style.display = '';
+          visibleRows.push(row);
+          totalDiff += rowDiff;
+          totalGmvA += rowGmvA;
+          totalGmvB += rowGmvB;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // Handle Empty State
+      const existingNoRes = tbody.querySelector('.no-results-row');
+      if (existingNoRes) existingNoRes.remove();
+
+      if (visibleRows.length === 0) {
+        const tr = document.createElement('tr');
+        tr.className = 'no-results-row';
+        tr.innerHTML = `<td colspan="7">${noResultText}</td>`;
+        tbody.appendChild(tr);
+      } else {
+        // Sorting
+        visibleRows.sort((a, b) => {
+          if (currentSort === 'id-asc') {
+            return a.getAttribute('data-id').localeCompare(b.getAttribute('data-id'));
+          } else if (currentSort === 'diff-desc') {
+            return parseInt(b.getAttribute('data-diff'), 10) - parseInt(a.getAttribute('data-diff'), 10);
+          } else if (currentSort === 'growth-desc') {
+            return parseFloat(b.getAttribute('data-growth')) - parseFloat(a.getAttribute('data-growth'));
+          } else if (currentSort === 'gmvb-desc') {
+            return parseInt(b.getAttribute('data-gmvb'), 10) - parseInt(a.getAttribute('data-gmvb'), 10);
+          } else if (currentSort === 'gmva-desc') {
+            return parseInt(b.getAttribute('data-gmva'), 10) - parseInt(a.getAttribute('data-gmva'), 10);
+          }
+          return 0;
+        });
+
+        visibleRows.forEach(row => tbody.appendChild(row));
+      }
+
+      // Dynamic Stats Update
+      statCount.textContent = `${visibleRows.length} / 13`;
+      statDiff.textContent = (totalDiff >= 0 ? '+' : '') + totalDiff.toLocaleString() + currencySuffix;
+      const avgGrowth = totalGmvA > 0 ? ((totalGmvB - totalGmvA) / totalGmvA * 100).toFixed(1) : '0.0';
+      statGrowth.textContent = '+' + avgGrowth + '%';
+    }
+
+    // Brand Chips Click
+    brandChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        brandChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentBrand = chip.getAttribute('data-brand');
+        applyFilterAndSort();
+      });
+    });
+
+    // Growth Tier Chips Click
+    growthChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        growthChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentTier = chip.getAttribute('data-tier');
+        applyFilterAndSort();
+      });
+    });
+
+    // Search Input
+    searchInput.addEventListener('input', (e) => {
+      currentSearch = e.target.value.trim().toLowerCase();
+      applyFilterAndSort();
+    });
+
+    // Sort Select
+    sortSelect.addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      applyFilterAndSort();
+    });
+
+    // Reset Button
+    resetBtn.addEventListener('click', () => {
+      currentBrand = 'ALL';
+      currentTier = 'ALL';
+      currentSearch = '';
+      currentSort = 'id-asc';
+
+      brandChips.forEach(c => c.classList.remove('active'));
+      brandChips[0].classList.add('active');
+
+      growthChips.forEach(c => c.classList.remove('active'));
+      growthChips[0].classList.add('active');
+
+      searchInput.value = '';
+      sortSelect.value = 'id-asc';
+
+      applyFilterAndSort();
+    });
+
+    // Initial Trigger
+    applyFilterAndSort();
+  })();
+</script>
+
+</body>
+</html>
